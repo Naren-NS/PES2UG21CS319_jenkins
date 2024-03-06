@@ -1,45 +1,50 @@
 pipeline {
-    agent any
-    
+    agent {
+        docker {
+            image 'node:14'
+        }
+    }
+
     stages {
-        stage('Checkout') {
+        stage('Clone repository') {
             steps {
-                // Checkout the source code from your version control system
-                git 'https://github.com/Naren-NS/jenkins.git'
+                git branch: 'main',
+                url: 'https://github.com/Naren-NS/jenkins.git' // Replace with your GitHub repository URL
             }
         }
 
-        stage('Build') {
+        stage('Install dependencies') {
             steps {
-                // Compile the .cpp file using a shell script
-                sh 'g++ -o my_executable your_cpp_file.cpp'
+                sh 'npm install'
             }
         }
 
-        stage('Test') {
+        stage('Build application') {
             steps {
-                // Print output of the .cpp file using a shell script
-                sh './my_executable'
+                sh 'npm run build'
             }
         }
 
-        stage('Deploy') {
+        stage('Test application') {
             steps {
-                // Placeholder for deployment steps
-                echo 'Deployment steps go here'
+                sh 'npm test'
+            }
+        }
+
+        stage('Push Docker image') {
+            steps {
+                sh 'docker build -t naren-ns/my-node-app:$BUILD_NUMBER .' // Replace with your Docker Hub username and image name
+                sh 'docker push naren-ns/my-node-app:$BUILD_NUMBER'
             }
         }
     }
 
     post {
         success {
-            // Additional steps to execute when the pipeline is successful
-            echo 'Pipeline executed successfully!'
+            echo 'Pipeline succeeded! Additional success steps can be added here.'
         }
-
         failure {
-            // Additional steps to execute when the pipeline fails
-            echo 'Pipeline failed! Check the logs for details.'
+            echo 'Pipeline failed! Additional failure steps can be added here.'
         }
     }
 }
