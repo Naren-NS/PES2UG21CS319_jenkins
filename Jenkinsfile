@@ -1,8 +1,6 @@
 pipeline {
     agent {
-        docker {
-            image 'node:14'
-        }
+        label:'docker'
     }
 
     stages {
