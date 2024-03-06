@@ -1,17 +1,23 @@
 pipeline {
-    agent any
+    agent {
+        label 'docker'
+    }
 
     stages {
         stage('Clone repository') {
             steps {
                 git branch: 'main',
-                url: 'https://github.com/Naren-NS/jenkins.git' // Replace with your GitHub repository URL
+                url: 'https://github.com/Naren-NS/jenkins.git'
             }
         }
 
         stage('Install dependencies') {
             steps {
-                sh 'npm install'
+                script {
+                    // Install Node.js and npm
+                    sh 'apt-get update && apt-get install -y nodejs npm'
+                    sh 'npm install'
+                }
             }
         }
 
@@ -29,8 +35,10 @@ pipeline {
 
         stage('Push Docker image') {
             steps {
-                sh 'docker build -t naren-ns/my-node-app:$BUILD_NUMBER .' // Replace with your Docker Hub username and image name
-                sh 'docker push naren-ns/my-node-app:$BUILD_NUMBER'
+                script {
+                    sh 'docker build -t naren-ns/my-image:$BUILD_NUMBER .'
+                    sh 'docker push naren-ns/my-image:$BUILD_NUMBER'
+                }
             }
         }
     }
